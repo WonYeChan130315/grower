@@ -5,23 +5,44 @@ using UnityEngine;
 public class TileManager : MonoBehaviour
 {
     public List<Vector3> tileList;
+    public List<GameObject> tileObjectList;
     public Transform ground;
     public Transform tileGroup;
     public GameObject ghostTile;
     public GameObject tilePrefab;
     public float space;
 
+    private int isBreak = 0;
+
     private void Update() {
         ghostTile.transform.position = ClickPos();
-        
+        Tile();
+    }   
+
+    private void Tile() {
         if (Input.GetMouseButton(0)) {
-            if(!CheckTile()) {
+            if(!CheckTile() && isBreak != 2) {
                 if(ClickPos() == new Vector3(0, 50, 0)) return;
                 
                 GameObject tile = Instantiate(tilePrefab, ClickPos(), Quaternion.identity);
                 tile.transform.parent = tileGroup;
                 tileList.Add(ClickPos());
+                tileObjectList.Add(tile);
+                isBreak = 1;
+            } else if(CheckTile() && isBreak != 1) {
+                if(ClickPos() == new Vector3(0, 50, 0)) return;
+                
+                for(int i = 0; i < tileList.Count; i++) {
+                    if(tileList[i] == ClickPos()) {
+                        Destroy(tileObjectList[i]);
+                        tileObjectList.Remove(tileObjectList[i]);
+                    }
+                }
+                tileList.Remove(ClickPos());
+                isBreak = 2;
             }
+        } else if(Input.GetMouseButtonUp(0)) {
+            isBreak = 0;
         }
     }
 
